@@ -22,7 +22,12 @@ int main(int argc, char* argv[]) {
 			getfsize(argv[1], UNIT_BYTE);
 		} else {
 			int unit = getunit(argv[2]);
-			getfsize(argv[1], unit);
+			if (unit == 69) {
+				fprintf(stderr, "Unit %s is not recognized.\n",argv[2]);
+				exit(1);
+			} else {
+				getfsize(argv[1], unit);
+			}
 		}
 	}
 
@@ -47,22 +52,22 @@ void getfsize(char *filename, int unit) {
 void printsize(int size, int unit) {
 	switch (unit) {
 		case UNIT_BYTE:
-			printf("%d byte(s)\n", size);
+			printf("~%d byte(s)\n", size);
 			break;
 		case UNIT_KILOBYTE:
-			printf("%.4lf kilobyte(s)\n", (double)size/1000);
+			printf("~%.6lf kilobyte(s)\n", (double)size/1000);
 			break;
 		case UNIT_MEGABYTE:
-			printf("%.4lf megabyte(s)\n", (double)size*0.000001);
+			printf("~%.6lf megabyte(s)\n", (double)size*0.000001);
 			break;
 		case UNIT_GIGABYTE:
-			printf("%.4lf gigabyte(s)\n", (double)size/1000000000);
+			printf("~%.6lf gigabyte(s)\n", (double)size/1000000000);
 			break;
 		case UNIT_ALL:
-			printf("\n\t%d byte(s)\n", size);
-			printf("\t%.4lf kilobyte(s)\n", (double)size/1000);
-			printf("\t%.4lf megabyte(s)\n", (double)size*0.000001);
-			printf("\t%.4lf gigabyte(s)\n", (double)size/1000000000);
+			printf("\n\t~%d byte(s)\n", size);
+			printf("\t~%.6lf kilobyte(s)\n", (double)size/1000);
+			printf("\t~%.6lf megabyte(s)\n", (double)size/1E+6);
+			printf("\t~%.6lf gigabyte(s)\n", (double)size/1E+9);
 			break;
 		default:
 			break;
@@ -83,7 +88,6 @@ int getunit(char *unitstr) {
 	else if (!strcmp(conv, "all"))
 		return UNIT_ALL;
 	else {
-		fprintf(stderr, "Unit: %s is not implemented or unknown\n");
-		exit(1);
+		return 69;
 	}
 }
