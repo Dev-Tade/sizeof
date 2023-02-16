@@ -1,0 +1,1 @@
+gcc -o ./bin/sizeof-gcc sizeof.c

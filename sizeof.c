@@ -1,93 +1,113 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "sizeof.h"
 
-void  printsize(int size, int unit);
-void  getfsize(char *filename, int unit);
-int   getunit(char *unitstr);
-
-#define UNIT_KILOBYTE 0
-#define UNIT_BYTE     1
-#define UNIT_MEGABYTE 2
-#define UNIT_GIGABYTE 3
-#define UNIT_ALL	  4
-
-int main(int argc, char* argv[]) {
-
-	if (!(argc >= 2)) {
-		fprintf(stderr, "Missing argument: <file>\n");
+int main(int argc, string argv[]) {
+	argc--;
+	
+	if (argc < 1) {
+		usage();
 		exit(1);
 	} else {
-		if (!(argc >= 3)) {
-			getfsize(argv[1], UNIT_BYTE);
-		} else {
-			int unit = getunit(argv[2]);
-			if (unit == 69) {
-				fprintf(stderr, "Unit %s is not recognized.\n",argv[2]);
-				exit(1);
-			} else {
-				getfsize(argv[1], unit);
-			}
+		argc--;
+		size_t fsize = sizeIn(argv[1]);
+		if (argc < 1) {
+			sizeOut(fsize, ALL);
+			exit(0);
 		}
+		
+		Unit unit = string2Unit(argv[2]);
+		sizeOut(fsize, unit);
+		exit(0);
 	}
 
-	return 0;
+	exit(0);
 }
 
-void getfsize(char *filename, int unit) {
-	FILE *fp = fopen(filename, "r");
-	if (fp == NULL) {
-		fprintf(stderr, "Cannot open file: %s\n", filename);
-		exit(1);
-	}
+void usage(void) {
+	printf("Usage:\n");
+	printf("\t./sizeof <FILE-PATH> <UNIT>\n");
+	printf("Units:\n");
+	printf("\tBIT\n\tBYTES     | B\n");
+	printf("\tKILOBYTES | KB\n");
+	printf("\tMEGABYTES | MB\n");
+	printf("\tGIGABYTES | GB\n");
+	printf("\tALL (DEFAULT)\n");
+	printf("\t(Units can be upper-case or lower-case)\n");
+}
 
-	fseek(fp, 0L, SEEK_END);
-	int size = ftell(fp);
-	rewind(fp);
+Unit string2Unit(const string unitStr) {
+	string2Lower(unitStr);
+
+	if (!strcmp(unitStr, "bits"))
+		return BIT;
+	if (!strcmp(unitStr, "bytes") 	   || !strcmp(unitStr, "b"))
+		return BYTE;
+	if (!strcmp(unitStr, "kilobytes")  || !strcmp(unitStr, "kb"))
+		return KILOBYTE;
+	if (!strcmp(unitStr, "megabytes")  || !strcmp(unitStr, "mb"))
+		return MEGABYTE;
+	if (!strcmp(unitStr, "gigabyte")   || !strcmp(unitStr, "gb"))
+		return GIGABYTE;
 	
-	printf("'%s' is ", filename);
-	printsize(size, unit);
+	if (!strcmp(unitStr, "all"))
+		return ALL;
+	else
+		return ALL;
 }
 
-void printsize(int size, int unit) {
+void string2Lower(string str) {
+	for (size_t i = 0; i < strlen(str); i++)
+		str[i] = tolower(str[i]);
+}
+
+size_t sizeIn(const string filePath) {
+	FILE* fptr = fopen(filePath, "r");
+	size_t size;
+	
+	fseek(fptr, 0, SEEK_END);
+	size = ftell(fptr);
+	fseek(fptr, 0, SEEK_SET);
+	
+	fclose(fptr);
+	
+	return size;
+}
+
+void sizeOut(size_t size, Unit unit) {
 	switch (unit) {
-		case UNIT_BYTE:
-			printf("~%d byte(s)\n", size);
+		case BIT:
+			printf("~%zu bits\n", size*8);
 			break;
-		case UNIT_KILOBYTE:
-			printf("~%.6lf kilobyte(s)\n", (double)size/1000);
+		
+		case BYTE:
+			printf("~%zu bytes\n", size);
 			break;
-		case UNIT_MEGABYTE:
-			printf("~%.6lf megabyte(s)\n", (double)size*0.000001);
+		
+		case KILOBYTE:
+			printf("~%.4lf kilobytes\n", (double)size/1000);
 			break;
-		case UNIT_GIGABYTE:
-			printf("~%.6lf gigabyte(s)\n", (double)size/1000000000);
+		
+		case MEGABYTE:
+			printf("~%.8lf megabytes\n", (double)size/1E6);
 			break;
-		case UNIT_ALL:
-			printf("\n\t~%d byte(s)\n", size);
-			printf("\t~%.6lf kilobyte(s)\n", (double)size/1000);
-			printf("\t~%.6lf megabyte(s)\n", (double)size/1E+6);
-			printf("\t~%.6lf gigabyte(s)\n", (double)size/1E+9);
+		
+		case GIGABYTE:
+			printf("~%.12lf gigabytes\n", (double)size/1E9);
 			break;
+	
+		case ALL:
+			sizeOut(size, BIT);
+			sizeOut(size, BYTE);
+			sizeOut(size, KILOBYTE);
+			sizeOut(size, MEGABYTE);
+			sizeOut(size, GIGABYTE);
+			break;
+			
 		default:
+			sizeOut(size, BIT);
+			sizeOut(size, BYTE);
+			sizeOut(size, KILOBYTE);
+			sizeOut(size, MEGABYTE);
+			sizeOut(size, GIGABYTE);
 			break;
-	}
-}
-
-int getunit(char *unitstr) {
-	char* conv = unitstr;
-
-	if (!strcmp(conv, "kb"))
-		return UNIT_KILOBYTE;
-	else if (!strcmp(conv, "b"))
-		return UNIT_BYTE;
-	else if (!strcmp(conv, "mb"))
-		return UNIT_MEGABYTE;
-	else if (!strcmp(conv, "gb"))
-		return UNIT_GIGABYTE;
-	else if (!strcmp(conv, "all"))
-		return UNIT_ALL;
-	else {
-		return 69;
 	}
 }
