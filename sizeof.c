@@ -26,7 +26,7 @@ void usage(void) {
 	printf("Usage:\n");
 	printf("\t./sizeof <FILE-PATH> <UNIT>\n");
 	printf("Units:\n");
-	printf("\tBIT\n\tBYTES     | B\n");
+	printf("\tBITS\n\tBYTES     | B\n");
 	printf("\tKILOBYTES | KB\n");
 	printf("\tMEGABYTES | MB\n");
 	printf("\tGIGABYTES | GB\n");
