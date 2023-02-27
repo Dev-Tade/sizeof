@@ -1,0 +1,1 @@
+tcc -o ./bin/sizeof-tcc.exe sizeof.c
