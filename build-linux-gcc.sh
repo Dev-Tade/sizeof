@@ -1,1 +1,2 @@
-gcc -o ./bin/sizeof-gcc sizeof.c
+gcc ./sizeof.c -o ./bin/sizeof-gcc
+gcc ./lines.c -o ./bin/lines-gcc
