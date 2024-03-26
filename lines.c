@@ -2,7 +2,6 @@
 #include <stdbool.h>
 
 void usage(void);
-void lines(char *fpath);
 
 int main(int argc, char *argv[])
 {
