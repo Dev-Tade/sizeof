@@ -1,53 +1,49 @@
-#include "sizeof.h"
+#include "common.h"
+#include <stdbool.h>
 
 void usage(void);
-void lines(string fpath);
+void lines(char *fpath);
 
-int main(int argc, string argv[])
+int main(int argc, char *argv[])
 {
-	argc--;
+	(void) args_shift(&argc, &argv); // consume program name
 	
-	if (argc < 1)
-  {
-		usage();
-		exit(1);
-	}
-  else
-  {
-		argc--;
-		lines(argv[1]);
+	if (argc >= 1) {
+    char *file_path = args_shift(&argc , &argv);
+    FILE *file_handle = fopen(file_path, "r");
+
+    unsigned long int line_count = 1;
+    bool done = false;
+
+    while (!done) {
+      switch (fgetc(file_handle)) {
+        case '\n':
+          line_count += 1;
+          break;
+
+        case EOF:
+          done = true;
+          break;
+
+        default:
+          continue;
+          break;
+      }
+    }
+
+    fclose(file_handle);
+
+    printf("%s -> %u lines\n", file_path, line_count);
+    exit(0);
 	}
 
-	exit(0);
+  // no file provided
+	usage();
+	exit(1);
 }
 
 void usage(void)
 {
 	printf("Usage:\n");
-	printf("\t./lines <FILE>\n");
-  return;
-}
-
-void lines(string fpath)
-{
-  size_t nlines = 0;
-  size_t bytes = sizeIn(fpath);
-  char *buff = (char*)malloc(bytes);
-  FILE *file = fopen(fpath, "rb");
-
-  if (fread(buff, sizeof(char), bytes, file) != bytes)
-  {
-    fprintf(stderr, "Error reading file (R<C)\n");
-    free(buff);
-    fclose(file);
-    exit(1);
-  }
-
-  for (int i=0; i<bytes; ++i)
-    if (buff[i] == 0xA) ++nlines;
-
-  printf("%s -> %d lines\n", fpath, nlines);
-
-  free(buff);
-  return;
+	printf("\tlines <file path>\n");
 }
