@@ -1,41 +1,48 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stdbool.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
 
-void string_tolower(char *str);
-char *args_shift(int *argc, char ***argv);
-size_t file_size(FILE *file_handle);
-
-void string_tolower(char *str)
+/*
+	-- Lowercase string contents --
+	NOTE: Definetly unsafe if `string` it's on a readonly section
+*/
+static inline void string_lowercase(char *string)
 {
-	while (*str != 0) {
-		*str = tolower(*str);
-		str += 1;
+	char c = 0;
+
+	while ( (c = *string) != 0 ) {
+		*string = tolower(c);
+		string += 1;
 	}
 }
 
-size_t file_size(FILE *file_handle)
+/*
+	-- Get file size in bytes --
+*/
+static bool get_file_size(FILE *file_handle, size_t *output, bool close_file)
 {
   if (file_handle == NULL) {
-    fprintf(stderr, "[file_size]: NULL file handle\n");
-    fclose(file_handle);
-    exit(1);
+    *output = 0;
+		return false;
   }
 
-	size_t size = 0;
-	
 	fseek(file_handle, 0, SEEK_END);
-	size = ftell(file_handle);
-	rewind(file_handle);
+	*output = ftell(file_handle);
+	fseek(file_handle, 0, SEEK_SET);
 	
-	fclose(file_handle);
-	return size;
+	if (close_file) {
+		fclose(file_handle);
+	}
+
+	return true;
 }
 
-char *args_shift(int *argc, char ***argv)
+static char *args_shift(int *argc, char ***argv)
 {
 	if (*argc > 0) {
 		char *shift = **argv;
